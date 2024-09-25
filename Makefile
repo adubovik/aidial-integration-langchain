@@ -23,7 +23,9 @@ format: install
 	poetry run nox -s format
 
 test: install
-	poetry run nox -s test $(if $(PYTHON),--python=$(PYTHON),)
+	poetry run nox -s test_monkey_patch $(if $(PYTHON),--python=$(PYTHON),)
+	poetry run nox -s test_custom_class $(if $(PYTHON),--python=$(PYTHON),)
+	poetry run nox -s test_openai $(if $(PYTHON),--python=$(PYTHON),)
 
 help:
 	@echo '===================='

@@ -50,8 +50,30 @@ supported_lc_openai_versions = [
 
 @nox.session(python=supported_python_versions)
 @nox.parametrize("langchain_openai", supported_lc_openai_versions)
-def test(session: nox.Session, langchain_openai: str) -> None:
+def test_monkey_patch(session: nox.Session, langchain_openai: str) -> None:
     """Runs tests for the patch"""
     session.run("poetry", "install", external=True)
     session.install(f"langchain_openai=={langchain_openai}")
-    session.run("pytest", "-k test_patch")
+    session.run(
+        "pytest",
+        "tests/test_langchain_monkey_patch.py",
+        "tests/test_langchain_noop.py",
+    )
+
+
+@nox.session(python=supported_python_versions)
+@nox.parametrize("langchain_openai", ["0.2.0"])
+def test_custom_class(session: nox.Session, langchain_openai: str) -> None:
+    """Runs tests for the patch"""
+    session.run("poetry", "install", external=True)
+    session.install(f"langchain_openai=={langchain_openai}")
+    session.run("pytest", "tests/test_langchain_custom_class.py")
+
+
+@nox.session(python=supported_python_versions)
+@nox.parametrize("openai", ["1.48.0"])
+def test_openai(session: nox.Session, openai: str) -> None:
+    """Runs tests for the patch"""
+    session.run("poetry", "install", external=True)
+    session.install(f"openai=={openai}")
+    session.run("pytest", "tests/test_openai.py")

@@ -17,7 +17,6 @@ class TestHTTPClient(httpx.AsyncClient):
 
     async def _to_sse_stream(self, chunks: List[dict]) -> AsyncIterator[bytes]:
         for chunk in chunks:
-            print(f"CHUNK: {chunk}")
             yield f"data: {json.dumps(chunk)}\n\n".encode("utf-8")
         yield b"data: [DONE]\n\n"
 
