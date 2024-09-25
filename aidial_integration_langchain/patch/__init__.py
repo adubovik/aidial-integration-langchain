@@ -1,0 +1,57 @@
+"""
+Monkey patching langchain_openai to proxy extra parameters to the upstream model.
+
+Workaround for https://github.com/langchain-ai/langchain/issues/26617
+"""
+
+import sys
+
+if "langchain_openai" in sys.modules.keys():
+    raise RuntimeError(
+        "Import patch module before any langchain_openai imports"
+    )
+
+
+import logging
+
+import langchain_openai.chat_models.base
+
+from aidial_integration_langchain.patch.decorators import (
+    patch_convert_chunk_to_generation_chunk,
+    patch_convert_delta_to_message_chunk,
+    patch_convert_dict_to_message,
+    patch_convert_message_to_dict,
+    patch_create_chat_result,
+)
+
+logging.getLogger(__name__).info("Patching langchain_open library...")
+
+langchain_openai.chat_models.base._convert_message_to_dict = (
+    patch_convert_message_to_dict(
+        langchain_openai.chat_models.base._convert_message_to_dict
+    )
+)
+
+langchain_openai.chat_models.base.BaseChatOpenAI._create_chat_result = (
+    patch_create_chat_result(
+        langchain_openai.chat_models.base.BaseChatOpenAI._create_chat_result
+    )
+)
+
+langchain_openai.chat_models.base._convert_dict_to_message = (
+    patch_convert_dict_to_message(
+        langchain_openai.chat_models.base._convert_dict_to_message
+    )
+)
+
+langchain_openai.chat_models.base._convert_delta_to_message_chunk = (
+    patch_convert_delta_to_message_chunk(
+        langchain_openai.chat_models.base._convert_delta_to_message_chunk
+    )
+)
+
+langchain_openai.chat_models.base._convert_chunk_to_generation_chunk = (
+    patch_convert_chunk_to_generation_chunk(
+        langchain_openai.chat_models.base._convert_chunk_to_generation_chunk
+    )
+)

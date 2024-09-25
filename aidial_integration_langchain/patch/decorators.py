@@ -1,26 +1,8 @@
-"""
-Monkey patching langchain_openai to proxy extra parameters to the upstream model.
-
-Workaround for https://github.com/langchain-ai/langchain/issues/26617
-"""
-
-import sys
-
-if "langchain_openai" in sys.modules.keys():
-    raise RuntimeError(
-        "Import patch module before any langchain_openai imports"
-    )
-
-import logging
 from typing import Any, Dict, Mapping, Optional, Type, Union
 
-import langchain_openai.chat_models.base
 import openai
 from langchain_core.messages import BaseMessage, BaseMessageChunk
 from langchain_core.outputs import ChatGenerationChunk
-from langchain_openai.chat_models.base import BaseChatOpenAI
-
-logging.getLogger(__name__).info("Patching langchain_open library...")
 
 
 def _mask_by_keys(d: dict, keys: list[str]) -> dict:
@@ -34,10 +16,7 @@ EXTRA_RESPONSE_MESSAGE_FIELDS = ["custom_content"]
 EXTRA_RESPONSE_FIELDS = ["statistics"]
 
 
-##############################
-
-
-def _patch_convert_message_to_dict(func):
+def patch_convert_message_to_dict(func):
     def _func(message: BaseMessage) -> dict:
         result = func(message)
         result.update(
@@ -51,16 +30,7 @@ def _patch_convert_message_to_dict(func):
     return _func
 
 
-langchain_openai.chat_models.base._convert_message_to_dict = (
-    _patch_convert_message_to_dict(
-        langchain_openai.chat_models.base._convert_message_to_dict
-    )
-)
-
-##############################
-
-
-def _patch_create_chat_result(func):
+def patch_create_chat_result(func):
     def _func(
         self,
         response: Union[dict, openai.BaseModel],
@@ -81,14 +51,7 @@ def _patch_create_chat_result(func):
     return _func
 
 
-BaseChatOpenAI._create_chat_result = _patch_create_chat_result(
-    BaseChatOpenAI._create_chat_result
-)
-
-##############################
-
-
-def _patch_convert_dict_to_message(func):
+def patch_convert_dict_to_message(func):
     def _func(_dict: Mapping[str, Any]) -> BaseMessage:
         result = func(_dict)
         result.additional_kwargs.update(_mask_by_keys(_dict, EXTRA_RESPONSE_MESSAGE_FIELDS))  # type: ignore
@@ -98,16 +61,7 @@ def _patch_convert_dict_to_message(func):
     return _func
 
 
-langchain_openai.chat_models.base._convert_dict_to_message = (
-    _patch_convert_dict_to_message(
-        langchain_openai.chat_models.base._convert_dict_to_message
-    )
-)
-
-##############################
-
-
-def _patch_convert_delta_to_message_chunk(func):
+def patch_convert_delta_to_message_chunk(func):
     def _func(
         _dict: Mapping[str, Any], default_class: Type[BaseMessageChunk]
     ) -> BaseMessageChunk:
@@ -118,17 +72,7 @@ def _patch_convert_delta_to_message_chunk(func):
     return _func
 
 
-langchain_openai.chat_models.base._convert_delta_to_message_chunk = (
-    _patch_convert_delta_to_message_chunk(
-        langchain_openai.chat_models.base._convert_delta_to_message_chunk
-    )
-)
-
-
-##############################
-
-
-def _patch_convert_chunk_to_generation_chunk(func):
+def patch_convert_chunk_to_generation_chunk(func):
     def _func(
         chunk: dict,
         default_chunk_class: Type,
@@ -142,10 +86,3 @@ def _patch_convert_chunk_to_generation_chunk(func):
         return result
 
     return _func
-
-
-langchain_openai.chat_models.base._convert_chunk_to_generation_chunk = (
-    _patch_convert_chunk_to_generation_chunk(
-        langchain_openai.chat_models.base._convert_chunk_to_generation_chunk
-    )
-)
