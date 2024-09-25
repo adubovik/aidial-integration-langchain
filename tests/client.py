@@ -4,7 +4,6 @@ from typing import AsyncIterator, List
 import httpx
 
 from tests.test_case import TestCase
-from tests.utils.json import is_subdict
 
 
 class TestHTTPClient(httpx.AsyncClient):
@@ -25,25 +24,25 @@ class TestHTTPClient(httpx.AsyncClient):
     async def send(self, request, **kwargs):
         request_dict = json.loads(request.content.decode())
 
-        if not is_subdict(self.test_case.request_top_level_extra, request_dict):
+        if not self.test_case.request_top_level_extra.is_valid(request_dict):
             return httpx.Response(
                 request=request,
                 status_code=400,
-                content="Didn't receive top-level extra fields",
+                content="Unexpected result for the top-level extra field",
             )
 
         for idx, value in self.test_case.request_message_extra.items():
-            if not is_subdict(value, request_dict["messages"][idx]):
+            if not value.is_valid(request_dict["messages"][idx]):
                 return httpx.Response(
                     request=request,
                     status_code=400,
-                    content="Didn't receive per-message extra fields",
+                    content="Unexpected result for the per-message extra field",
                 )
 
         message = {
             "role": "assistant",
             "content": "answer",
-            **self.test_case.response_message_extra,
+            **self.test_case.response_message_extra.value,
         }
 
         stream = request_dict.get("stream") is True
@@ -61,7 +60,7 @@ class TestHTTPClient(httpx.AsyncClient):
                 "completion_tokens": 2,
                 "total_tokens": 3,
             },
-            **self.test_case.response_top_level_extra,
+            **self.test_case.response_top_level_extra.value,
         }
 
         if stream:

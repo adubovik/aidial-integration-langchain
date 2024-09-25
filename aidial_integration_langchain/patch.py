@@ -11,6 +11,7 @@ if "langchain_openai" in sys.modules.keys():
         "Import patch module before any langchain_openai imports"
     )
 
+import logging
 from typing import Any, Dict, Mapping, Optional, Type, Union
 
 import langchain_openai.chat_models.base
@@ -30,6 +31,8 @@ from langchain_openai.chat_models.base import (
 from langchain_openai.chat_models.base import (
     _convert_message_to_dict as _original_convert_message_to_dict,
 )
+
+logging.getLogger(__name__).info("Patching langchain_open library...")
 
 
 def _mask_keys(d: dict, keys: list[str]) -> dict:

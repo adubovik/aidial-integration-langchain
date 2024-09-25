@@ -1,94 +1,155 @@
-import aidial_integration_langchain.patch  # isort:skip  # noqa: F401
-
+import importlib
 import logging
-from typing import AsyncIterator, cast
+import sys
+from contextlib import contextmanager
+from typing import AsyncIterator, Tuple
 
 import pytest
-from langchain_core.messages import (
-    BaseMessage,
-    BaseMessageChunk,
-    HumanMessage,
-)
-from langchain_core.outputs.chat_generation import ChatGeneration
-from langchain_openai import ChatOpenAI
 from openai import AsyncClient
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
-from pydantic import SecretStr
 
 from tests.client import TestHTTPClient
-from tests.test_case import TestCase
-from tests.utils.json import is_subdict
+from tests.test_case import IncludeTest, TestCase
 
 logging.getLogger().setLevel(logging.DEBUG)
 
-
-test_case = TestCase(
-    request_top_level_extra={"custom_fields": {"configuration": {"a": "b"}}},
-    request_message_extra={0: {"custom_content": {"state": "foobar"}}},
-    response_top_level_extra={"statistics": {"a": "b"}},
-    response_message_extra={"custom_content": {"attachments": []}},
-)
-
-http_client = TestHTTPClient(test_case=test_case)
-
-langchain_chat_client = ChatOpenAI(
-    api_key=SecretStr("dummy-key"),
-    http_async_client=http_client,
-    max_retries=0,
-)
-
-openai_client = AsyncClient(api_key="dummy-key", http_client=http_client)
+inc = IncludeTest.create
 
 
-@pytest.mark.asyncio
-async def test_langchain_block():
-    message = HumanMessage(
-        content="question",
-        additional_kwargs=test_case.request_message_extra[0],
-    )
-
-    output = await langchain_chat_client.agenerate(
-        messages=[[message]],
-        extra_body=test_case.request_top_level_extra,
-    )
-
-    generation = cast(ChatGeneration, output.generations[0][0])
-    response: BaseMessage = generation.message
-
-    assert is_subdict(
-        test_case.response_top_level_extra, response.response_metadata
-    )
-
-    assert is_subdict(
-        test_case.response_message_extra, response.additional_kwargs
+def create_test_case(incs: Tuple[bool, bool, bool, bool]):
+    return TestCase(
+        request_top_level_extra=inc(
+            incs[0], {"custom_fields": {"configuration": {"a": "b"}}}
+        ),
+        request_message_extra={
+            0: inc(incs[1], {"custom_content": {"state": "foobar"}})
+        },
+        response_top_level_extra=inc(incs[2], {"statistics": {"a": "b"}}),
+        response_message_extra=inc(
+            incs[3], {"custom_content": {"attachments": []}}
+        ),
     )
 
 
-@pytest.mark.asyncio
-async def test_langchain_streaming():
+test_case_openai = create_test_case((True, True, True, True))
 
-    request_message = HumanMessage(
-        content="question",
-        additional_kwargs=test_case.request_message_extra[0],
-    )
 
-    stream: AsyncIterator[BaseMessageChunk] = langchain_chat_client.astream(
-        input=[request_message],
-        extra_body=test_case.request_top_level_extra,
-    )
+def unload_langchain():
+    for name in list(sys.modules):
+        if any(s in name for s in ["langchain", "langsmith", "pydantic"]):
+            del sys.modules[name]
 
-    async for chunk in stream:
-        assert is_subdict(
-            test_case.response_top_level_extra, chunk.response_metadata
+
+def unload_module(module: str):
+    if module in sys.modules:
+        del sys.modules[module]
+
+
+@contextmanager
+def with_patch():
+    module = "aidial_integration_langchain.patch"
+    importlib.import_module(module)
+    yield
+    unload_module(module)
+
+
+@contextmanager
+def with_langchain():
+    langchain_core = importlib.import_module("langchain_core")
+    langchain_openai = importlib.import_module("langchain_openai")
+
+    def get_langchain_chat_client(test_case: TestCase):
+        return langchain_openai.ChatOpenAI(
+            api_key="dummy-key",
+            http_async_client=TestHTTPClient(test_case=test_case),
+            max_retries=0,
         )
 
-        assert is_subdict(
-            test_case.response_message_extra, chunk.additional_kwargs
+    yield langchain_core.messages.HumanMessage, get_langchain_chat_client
+
+    unload_langchain()
+
+
+@contextmanager
+def get_langchain_manager(patched: bool):
+    if patched:
+        with with_patch():
+            with with_langchain() as lc:
+                yield lc
+    else:
+        with with_langchain() as lc:
+            yield lc
+
+
+def get_langchain_test_case(patched: bool) -> TestCase:
+    if patched:
+        return create_test_case((True, True, True, True))
+    else:
+        return create_test_case((True, False, False, False))
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("patched", [True, False])
+async def test_langchain_block(patched):
+    test_case = get_langchain_test_case(patched)
+    with get_langchain_manager(patched) as lc:
+        HumanMessage, get_client = lc
+
+        message = HumanMessage(
+            content="question",
+            additional_kwargs=test_case.request_message_extra[0].value,
+        )
+
+        output = await get_client(test_case).agenerate(
+            messages=[[message]],
+            extra_body=test_case.request_top_level_extra.value,
+        )
+
+        generation = output.generations[0][0]
+        response = generation.message
+
+        assert test_case.response_top_level_extra.is_valid(
+            response.response_metadata
+        )
+
+        assert test_case.response_message_extra.is_valid(
+            response.additional_kwargs
         )
 
 
 @pytest.mark.asyncio
-async def test_openai_stream():
+@pytest.mark.parametrize("patched", [True, False])
+async def test_langchain_streaming(patched):
+    test_case = get_langchain_test_case(patched)
+    with get_langchain_manager(patched) as lc:
+        HumanMessage, get_client = lc
+
+        request_message = HumanMessage(
+            content="question",
+            additional_kwargs=test_case.request_message_extra[0].value,
+        )
+
+        stream = get_client(test_case).astream(
+            input=[request_message],
+            extra_body=test_case.request_top_level_extra.value,
+        )
+
+        async for chunk in stream:
+            assert test_case.response_top_level_extra.is_valid(
+                chunk.response_metadata
+            )
+
+            assert test_case.response_message_extra.is_valid(
+                chunk.additional_kwargs
+            )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("test_case", [test_case_openai])
+async def test_openai_stream(test_case: TestCase):
+
+    http_client = TestHTTPClient(test_case=test_case)
+    openai_client = AsyncClient(api_key="dummy-key", http_client=http_client)
 
     stream: AsyncIterator[
         ChatCompletionChunk
@@ -98,16 +159,16 @@ async def test_openai_stream():
             {
                 "role": "user",
                 "content": "question",
-                **test_case.request_message_extra[0],
+                **test_case.request_message_extra[0].value,
             }  # type: ignore
         ],
         stream=True,
-        extra_body=test_case.request_top_level_extra,
+        extra_body=test_case.request_top_level_extra.value,
     )  # type: ignore
 
     async for c in stream:
         chunk = c.model_dump()
-        assert is_subdict(test_case.response_top_level_extra, chunk)
-        assert is_subdict(
-            test_case.response_message_extra, chunk["choices"][0]["delta"]
+        assert test_case.response_top_level_extra.is_valid(chunk)
+        assert test_case.response_message_extra.is_valid(
+            chunk["choices"][0]["delta"]
         )
