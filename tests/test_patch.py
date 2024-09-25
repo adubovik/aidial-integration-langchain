@@ -59,15 +59,13 @@ def with_langchain(is_azure: bool):
     langchain_openai = importlib.import_module("langchain_openai")
 
     def get_langchain_chat_client(test_case: TestCase):
-        extra_kwargs = (
-            {"api_version": "dummy-version", "azure_endpoint": "dummy-url"}
+        cls, extra_kwargs = (
+            (
+                langchain_openai.AzureChatOpenAI,
+                {"api_version": "dummy-version", "azure_endpoint": "dummy-url"},
+            )
             if is_azure
-            else {}
-        )
-        cls = (
-            langchain_openai.AzureChatOpenAI
-            if is_azure
-            else langchain_openai.ChatOpenAI
+            else (langchain_openai.ChatOpenAI, {})
         )
         return cls(
             api_key="dummy-key",
