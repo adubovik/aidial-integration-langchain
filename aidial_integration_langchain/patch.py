@@ -35,7 +35,7 @@ from langchain_openai.chat_models.base import (
 logging.getLogger(__name__).info("Patching langchain_open library...")
 
 
-def _mask_keys(d: dict, keys: list[str]) -> dict:
+def _mask_by_keys(d: dict, keys: list[str]) -> dict:
     return {k: d[k] for k in keys if k in d}
 
 
@@ -52,7 +52,7 @@ EXTRA_RESPONSE_FIELDS = ["statistics"]
 def _patched_convert_message_to_dict(message: BaseMessage) -> dict:
     result = _original_convert_message_to_dict(message)
     result.update(
-        _mask_keys(message.additional_kwargs, EXTRA_REQUEST_MESSAGE_FIELDS)
+        _mask_by_keys(message.additional_kwargs, EXTRA_REQUEST_MESSAGE_FIELDS)
     )
 
     return result
@@ -76,7 +76,7 @@ def _patched_create_chat_result(
 
     _dict = response if isinstance(response, dict) else response.model_dump()
 
-    if extra := _mask_keys(_dict, EXTRA_RESPONSE_FIELDS):
+    if extra := _mask_by_keys(_dict, EXTRA_RESPONSE_FIELDS):
         result.llm_output = result.llm_output or {}
         result.llm_output.update(extra)
 
@@ -90,7 +90,7 @@ BaseChatOpenAI._create_chat_result = _patched_create_chat_result
 
 def _patched_convert_dict_to_message(_dict: Mapping[str, Any]) -> BaseMessage:
     result = _original_convert_dict_to_message(_dict)
-    result.additional_kwargs.update(_mask_keys(_dict, EXTRA_RESPONSE_MESSAGE_FIELDS))  # type: ignore
+    result.additional_kwargs.update(_mask_by_keys(_dict, EXTRA_RESPONSE_MESSAGE_FIELDS))  # type: ignore
 
     return result
 
@@ -106,7 +106,7 @@ def _patched_convert_delta_to_message_chunk(
     _dict: Mapping[str, Any], default_class: Type[BaseMessageChunk]
 ) -> BaseMessageChunk:
     result = _original_convert_delta_to_message_chunk(_dict, default_class)
-    result.additional_kwargs.update(_mask_keys(_dict, EXTRA_RESPONSE_MESSAGE_FIELDS))  # type: ignore
+    result.additional_kwargs.update(_mask_by_keys(_dict, EXTRA_RESPONSE_MESSAGE_FIELDS))  # type: ignore
     return result
 
 
@@ -126,7 +126,7 @@ def _patched_convert_chunk_to_generation_chunk(
     )
     if result:
         result.message.response_metadata.update(
-            _mask_keys(chunk, EXTRA_RESPONSE_FIELDS)
+            _mask_by_keys(chunk, EXTRA_RESPONSE_FIELDS)
         )
     return result
 

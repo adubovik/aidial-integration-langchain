@@ -54,15 +54,26 @@ def with_patch():
 
 
 @contextmanager
-def with_langchain():
+def with_langchain(is_azure: bool):
     langchain_core = importlib.import_module("langchain_core")
     langchain_openai = importlib.import_module("langchain_openai")
 
     def get_langchain_chat_client(test_case: TestCase):
-        return langchain_openai.ChatOpenAI(
+        extra_kwargs = (
+            {"api_version": "dummy-version", "azure_endpoint": "dummy-url"}
+            if is_azure
+            else {}
+        )
+        cls = (
+            langchain_openai.AzureChatOpenAI
+            if is_azure
+            else langchain_openai.ChatOpenAI
+        )
+        return cls(
             api_key="dummy-key",
             http_async_client=TestHTTPClient(test_case=test_case),
             max_retries=0,
+            **extra_kwargs
         )
 
     yield langchain_core.messages.HumanMessage, get_langchain_chat_client
@@ -71,13 +82,13 @@ def with_langchain():
 
 
 @contextmanager
-def get_langchain_manager(patched: bool):
+def get_langchain_manager(patched: bool, is_azure: bool):
     if patched:
         with with_patch():
-            with with_langchain() as lc:
+            with with_langchain(is_azure) as lc:
                 yield lc
     else:
-        with with_langchain() as lc:
+        with with_langchain(is_azure) as lc:
             yield lc
 
 
@@ -90,9 +101,10 @@ def get_langchain_test_case(patched: bool) -> TestCase:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("patched", [True, False])
-async def test_langchain_block(patched):
+@pytest.mark.parametrize("is_azure", [True, False])
+async def test_langchain_block(patched, is_azure):
     test_case = get_langchain_test_case(patched)
-    with get_langchain_manager(patched) as lc:
+    with get_langchain_manager(patched, is_azure) as lc:
         HumanMessage, get_client = lc
 
         message = HumanMessage(
@@ -119,9 +131,10 @@ async def test_langchain_block(patched):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("patched", [True, False])
-async def test_langchain_streaming(patched):
+@pytest.mark.parametrize("is_azure", [True, False])
+async def test_langchain_streaming(patched, is_azure):
     test_case = get_langchain_test_case(patched)
-    with get_langchain_manager(patched) as lc:
+    with get_langchain_manager(patched, is_azure) as lc:
         HumanMessage, get_client = lc
 
         request_message = HumanMessage(
