@@ -1,3 +1,4 @@
+import inspect
 from typing import Any, Dict, Mapping, Optional, Type, Union
 
 import openai
@@ -7,6 +8,18 @@ from langchain_core.outputs import ChatGenerationChunk
 
 def _mask_by_keys(d: dict, keys: list[str]) -> dict:
     return {k: d[k] for k in keys if k in d}
+
+
+def _get_pos_arg_count(func):
+    signature = inspect.signature(func)
+    return len(
+        [
+            param
+            for param in signature.parameters.values()
+            if param.kind
+            in (param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD)
+        ]
+    )
 
 
 EXTRA_REQUEST_MESSAGE_FIELDS = ["custom_content"]
@@ -55,7 +68,11 @@ def patch_create_chat_result(func):
         response: Union[dict, openai.BaseModel],
         generation_info: Optional[Dict] = None,
     ):
-        result = func(self, response, generation_info)
+        result = (
+            func(self, response, generation_info)
+            if _get_pos_arg_count(func) == 3
+            else func(self, response)
+        )
 
         _dict = (
             response if isinstance(response, dict) else response.model_dump()
