@@ -30,27 +30,6 @@ def patch_convert_message_to_dict(func):
     return _func
 
 
-def patch_create_chat_result(func):
-    def _func(
-        self,
-        response: Union[dict, openai.BaseModel],
-        generation_info: Optional[Dict] = None,
-    ):
-        result = func(self, response, generation_info)
-
-        _dict = (
-            response if isinstance(response, dict) else response.model_dump()
-        )
-
-        if extra := _mask_by_keys(_dict, EXTRA_RESPONSE_FIELDS):
-            result.llm_output = result.llm_output or {}
-            result.llm_output.update(extra)
-
-        return result
-
-    return _func
-
-
 def patch_convert_dict_to_message(func):
     def _func(_dict: Mapping[str, Any]) -> BaseMessage:
         result = func(_dict)
@@ -67,6 +46,27 @@ def patch_convert_delta_to_message_chunk(func):
     ) -> BaseMessageChunk:
         result = func(_dict, default_class)
         result.additional_kwargs.update(_mask_by_keys(_dict, EXTRA_RESPONSE_MESSAGE_FIELDS))  # type: ignore
+        return result
+
+    return _func
+
+
+def patch_create_chat_result(func):
+    def _func(
+        self,
+        response: Union[dict, openai.BaseModel],
+        generation_info: Optional[Dict] = None,
+    ):
+        result = func(self, response, generation_info)
+
+        _dict = (
+            response if isinstance(response, dict) else response.model_dump()
+        )
+
+        if extra := _mask_by_keys(_dict, EXTRA_RESPONSE_FIELDS):
+            result.llm_output = result.llm_output or {}
+            result.llm_output.update(extra)
+
         return result
 
     return _func
