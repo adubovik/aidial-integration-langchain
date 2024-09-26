@@ -7,7 +7,7 @@ Workaround for https://github.com/langchain-ai/langchain/issues/26617
 import logging
 import sys
 
-from aidial_integration_langchain.patch.decorators import (
+from .decorators import (
     patch_convert_chunk_to_generation_chunk,
     patch_convert_delta_to_message_chunk,
     patch_convert_dict_to_message,
