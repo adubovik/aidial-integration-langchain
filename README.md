@@ -90,3 +90,15 @@ Simply import the `AzureChatOpenAI` class from this repo instead of `langchain_o
 ### Supported versions
 
 Currently only `langchain_openai==0.2.0` is supported for Python 3.9, 3.10, 3.11 and 3.12.
+
+## Environment variables
+
+The list of extra fields that are allowed to pass-through is controlled by the following environment variables.
+
+|Name|Default|
+|---|---|
+|LC_EXTRA_REQUEST_MESSAGE_FIELDS|custom_content|
+|LC_EXTRA_RESPONSE_MESSAGE_FIELDS|custom_content|
+|LC_EXTRA_RESPONSE_FIELDS|statistics|
+
+Each contains a comma-separated list of field names.

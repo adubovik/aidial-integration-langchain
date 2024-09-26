@@ -1,5 +1,6 @@
 import inspect
-from typing import Any, Dict, Mapping, Optional, Type, Union
+import os
+from typing import Any, Dict, List, Mapping, Optional, Type, Union
 
 import openai
 from langchain_core.messages import BaseMessage, BaseMessageChunk
@@ -22,11 +23,22 @@ def _get_pos_arg_count(func):
     )
 
 
-EXTRA_REQUEST_MESSAGE_FIELDS = ["custom_content"]
+def _get_env_var_list(name: str) -> Optional[List[str]]:
+    value = os.getenv(name)
+    return None if value is None else value.split(",")
+
+
+EXTRA_REQUEST_MESSAGE_FIELDS = _get_env_var_list(
+    "LC_EXTRA_REQUEST_MESSAGE_FIELDS"
+) or ["custom_content"]
+EXTRA_RESPONSE_MESSAGE_FIELDS = _get_env_var_list(
+    "LC_EXTRA_RESPONSE_MESSAGE_FIELDS"
+) or ["custom_content"]
+EXTRA_RESPONSE_FIELDS = _get_env_var_list("LC_EXTRA_RESPONSE_FIELDS") or [
+    "statistics"
+]
 # NOTE: not really needed, since they are propagated automatically via extra_body
 # EXTRA_REQUEST_FIELDS = ["addons", "max_prompt_tokens", "custom_fields"]
-EXTRA_RESPONSE_MESSAGE_FIELDS = ["custom_content"]
-EXTRA_RESPONSE_FIELDS = ["statistics"]
 
 
 def patch_convert_message_to_dict(func):
