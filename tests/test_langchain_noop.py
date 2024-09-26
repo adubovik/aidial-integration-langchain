@@ -1,13 +1,9 @@
-import logging
-
 import pytest
 
 from tests.test_cases import (
     run_test_langchain_block,
     run_test_langchain_streaming,
 )
-
-logging.getLogger().setLevel(logging.DEBUG)
 
 
 @pytest.mark.asyncio

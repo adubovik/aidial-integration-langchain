@@ -27,7 +27,7 @@ class TestHTTPClient(httpx.AsyncClient):
             return httpx.Response(
                 request=request,
                 status_code=400,
-                content="Unexpected result for the top-level extra field",
+                content="Unexpected result for the request top-level extra field",
             )
 
         for idx, value in self.test_case.request_message_extra.items():
@@ -35,7 +35,7 @@ class TestHTTPClient(httpx.AsyncClient):
                 return httpx.Response(
                     request=request,
                     status_code=400,
-                    content="Unexpected result for the per-message extra field",
+                    content="Unexpected result for the request per-message extra field",
                 )
 
         message = {

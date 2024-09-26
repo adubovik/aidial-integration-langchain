@@ -1,5 +1,3 @@
-import logging
-
 import pytest
 
 from tests.test_cases import (
@@ -7,8 +5,6 @@ from tests.test_cases import (
     run_test_langchain_streaming,
 )
 from tests.utils import PatchType
-
-logging.getLogger().setLevel(logging.DEBUG)
 
 
 @pytest.mark.asyncio
