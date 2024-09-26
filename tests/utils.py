@@ -42,15 +42,21 @@ def unload_module(module: str):
 @contextmanager
 def with_monkey_patch():
     module = "aidial_integration_langchain.patch"
+
+    unload_langchain()
+    unload_module(module)
     importlib.import_module(module)
-    try:
-        yield
-    finally:
-        unload_module(module)
+
+    yield
+
+    unload_module(module)
+    unload_langchain()
 
 
 @contextmanager
 def with_langchain(is_azure: bool, is_custom_class: bool):
+    unload_langchain()
+
     langchain_core = importlib.import_module("langchain_core")
     langchain_openai = importlib.import_module(
         "aidial_integration_langchain.langchain_openai"
@@ -74,10 +80,9 @@ def with_langchain(is_azure: bool, is_custom_class: bool):
             **extra_kwargs,
         )
 
-    try:
-        yield langchain_core.messages.HumanMessage, get_langchain_chat_client
-    finally:
-        unload_langchain()
+    yield langchain_core.messages.HumanMessage, get_langchain_chat_client
+
+    unload_langchain()
 
 
 class PatchType(int, Enum):
