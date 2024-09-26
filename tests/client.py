@@ -23,20 +23,25 @@ class TestHTTPClient(httpx.AsyncClient):
     async def send(self, request, **kwargs):
         request_dict = json.loads(request.content.decode())
 
+        errors: List[str] = []
+
         if not self.test_case.request_top_level_extra.is_valid(request_dict):
-            return httpx.Response(
-                request=request,
-                status_code=400,
-                content="Unexpected result for the request top-level extra field",
+            errors.append(
+                "Unexpected result for the request top-level extra field"
             )
 
         for idx, value in self.test_case.request_message_extra.items():
             if not value.is_valid(request_dict["messages"][idx]):
-                return httpx.Response(
-                    request=request,
-                    status_code=400,
-                    content="Unexpected result for the request per-message extra field",
+                errors.append(
+                    f"Unexpected result for the request message[{idx}] extra field"
                 )
+
+        if errors:
+            return httpx.Response(
+                request=request,
+                status_code=400,
+                content="\n".join(errors),
+            )
 
         message = {
             "role": "assistant",

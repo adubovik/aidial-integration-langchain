@@ -24,7 +24,6 @@ def patch_convert_message_to_dict(func):
                 message.additional_kwargs, EXTRA_REQUEST_MESSAGE_FIELDS
             )
         )
-
         return result
 
     return _func
@@ -34,7 +33,6 @@ def patch_convert_dict_to_message(func):
     def _func(_dict: Mapping[str, Any]) -> BaseMessage:
         result = func(_dict)
         result.additional_kwargs.update(_mask_by_keys(_dict, EXTRA_RESPONSE_MESSAGE_FIELDS))  # type: ignore
-
         return result
 
     return _func
