@@ -34,13 +34,33 @@ def format(session: nox.Session):
 
 
 supported_python_versions = [
-    "3.9",
-    "3.10",
+    # "3.9",
+    # "3.10",
     "3.11",
-    "3.12",
+    # "3.12",
 ]
 supported_lc_openai_versions = [
-    # "0.1.22",  # fail: cannot import name '_convert_chunk_to_generation_chunk' from 'langchain_openai.chat_models.base'
+    # "0.0.2",  # AsyncCompletions.create() got an unexpected keyword argument 'http_async_client'
+    "0.1.1",
+    "0.1.2",
+    "0.1.3",
+    "0.1.4",  # module 'langchain_openai.chat_models.base' has no attribute 'BaseChatOpenAI'
+    "0.1.5",
+    "0.1.6",
+    "0.1.7",
+    "0.1.8",
+    "0.1.9",
+    "0.1.10",
+    "0.1.11",
+    "0.1.12",
+    "0.1.13",
+    "0.1.14",
+    "0.1.15",
+    "0.1.16",  # BaseChatOpenAI._create_chat_result() takes 2 positional arguments but 3
+    "0.1.17",
+    "0.1.19",
+    "0.1.20",
+    "0.1.22",  # '_convert_chunk_to_generation_chunk' from 'langchain_openai.chat_models.base' doesn't exist
     "0.1.23",
     "0.1.24",
     "0.1.25",

@@ -30,11 +30,19 @@ langchain_openai.chat_models.base._convert_message_to_dict = (
     )
 )
 
-langchain_openai.chat_models.base.BaseChatOpenAI._create_chat_result = (
-    patch_create_chat_result(
-        langchain_openai.chat_models.base.BaseChatOpenAI._create_chat_result
+if hasattr(langchain_openai.chat_models.base, "BaseChatOpenAI"):
+    # Since langchain_openai>=0.1.5
+    langchain_openai.chat_models.base.BaseChatOpenAI._create_chat_result = (
+        patch_create_chat_result(
+            langchain_openai.chat_models.base.BaseChatOpenAI._create_chat_result
+        )
     )
-)
+elif hasattr(langchain_openai.chat_models.base, "ChatOpenAI"):
+    langchain_openai.chat_models.base.ChatOpenAI._create_chat_result = (
+        patch_create_chat_result(
+            langchain_openai.chat_models.base.ChatOpenAI._create_chat_result
+        )
+    )
 
 langchain_openai.chat_models.base._convert_dict_to_message = (
     patch_convert_dict_to_message(
