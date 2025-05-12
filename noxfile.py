@@ -34,6 +34,7 @@ def format(session: nox.Session):
 
 
 supported_python_versions = [
+    "3.8",
     "3.9",
     "3.10",
     "3.11",
@@ -67,7 +68,7 @@ supported_lc_openai_versions = [
     "0.1.24",
     "0.1.25",
     "0.2.0",
-]
+][-1:]
 
 
 @nox.session(python=supported_python_versions)
