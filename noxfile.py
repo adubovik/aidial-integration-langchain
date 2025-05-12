@@ -67,7 +67,7 @@ supported_lc_openai_versions = [
     "0.1.24",
     "0.1.25",
     "0.2.0",
-][-1:]
+]
 
 
 @nox.session(python=supported_python_versions)

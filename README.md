@@ -40,7 +40,7 @@ import patch # isort:skip  # noqa: F401
 
 ### Supported versions
 
-The following `langchain_openai` versions have been tested for Python 3.9, 3.10, 3.11 and 3.12:
+The following `langchain_openai` versions have been tested for Python 3.9, 3.10, 3.11, 3.12, and 3.13:
 
 |Version|Request per-message|Response per-message|Response top-level|
 |---|---|---|---|
