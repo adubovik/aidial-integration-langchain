@@ -38,7 +38,9 @@ supported_python_versions = [
     "3.10",
     "3.11",
     "3.12",
+    "3.13",
 ]
+
 supported_lc_openai_versions = [
     # "0.0.2",  # AsyncCompletions.create() got an unexpected keyword argument 'http_async_client'
     "0.1.1",

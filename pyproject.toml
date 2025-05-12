@@ -31,6 +31,11 @@ autoflake = "^2.2.0"
 testpaths = [
     "tests"
 ]
+filterwarnings = [
+    "error",
+    "ignore:Failing to pass a value to the 'type_params' parameter:DeprecationWarning",
+]
+
 
 [tool.pyright]
 typeCheckingMode = "basic"
