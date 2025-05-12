@@ -22,7 +22,8 @@ if "langchain_openai" in sys.modules.keys():
 
 import langchain_openai.chat_models.base
 
-logging.getLogger(__name__).info("Patching langchain_open library...")
+logger = logging.getLogger(__name__)
+logger.info("Patching langchain_openai library...")
 
 langchain_openai.chat_models.base._convert_message_to_dict = (
     patch_convert_message_to_dict(
