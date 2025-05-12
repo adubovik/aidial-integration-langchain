@@ -34,7 +34,6 @@ def format(session: nox.Session):
 
 
 supported_python_versions = [
-    "3.8",
     "3.9",
     "3.10",
     "3.11",
