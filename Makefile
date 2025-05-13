@@ -11,10 +11,10 @@ init_env:
 install: init_env
 	$(UV) sync --quiet --all-extras
 
-build:
+build: install
 	$(UV) build
 
-publish:
+publish: build
 	$(UV) publish --no-sources
 
 clean:

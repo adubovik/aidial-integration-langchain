@@ -34,10 +34,9 @@ lint = [
 requires    = ["uv_build>=0.7.3,<0.8.0"]
 build-backend = "uv_build"
 
-[tool.uv.build-backend]
-module-root = "."
-
 [tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+addopts = "--asyncio-mode=auto"
 testpaths = [
     "tests"
 ]
@@ -66,10 +65,10 @@ line-length = 80
 exclude = '''
 /(
     \.git
-  | \.venv
-  | \.nox
-  | \.pytest_cache
-  | \.__pycache__
+    | \.venv
+    | \.nox
+    | \.pytest_cache
+    | \.__pycache__
 )/
 '''
 
