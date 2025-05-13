@@ -1,39 +1,39 @@
 VENV_DIR ?= .venv
-POETRY ?= $(VENV_DIR)/bin/poetry
-POETRY_VERSION ?= 2.1.3
+UV ?= $(VENV_DIR)/bin/uv
+UV_VERSION ?= 0.7.3
 
-all: build
+all: install
 
 init_env:
 	python -m venv $(VENV_DIR)
-	$(VENV_DIR)/bin/pip install poetry==$(POETRY_VERSION) --quiet
+	$(VENV_DIR)/bin/pip install uv==$(UV_VERSION) --quiet
 
 install: init_env
-	$(POETRY) install -q --all-extras
+	$(UV) sync --quiet --all-extras
 
-build: install
-	$(POETRY) build
+build:
+	$(UV) build
+
+publish:
+	$(UV) publish --no-sources
 
 clean:
-	rm -rf $$($(POETRY) env info --path)
+	rm -rf $(VENV_DIR)
 	rm -rf .nox
 	rm -rf .pytest_cache
 	rm -rf dist
 	find . -type d -name __pycache__ | xargs rm -r
 
-publish: build
-	$(POETRY) publish -u __token__ -p ${PYPI_TOKEN} --skip-existing
-
 lint: install
-	$(POETRY) run nox -s lint
+	$(UV) run -- nox -s lint
 
 format: install
-	$(POETRY) run nox -s format
+	$(UV) run -- nox -s format
 
 test: install
-	$(POETRY) run nox -s test_monkey_patch $(if $(PYTHON),--python=$(PYTHON),)
-	$(POETRY) run nox -s test_custom_class $(if $(PYTHON),--python=$(PYTHON),)
-	$(POETRY) run nox -s test_openai $(if $(PYTHON),--python=$(PYTHON),)
+	$(UV) run -- nox -s test_monkey_patch $(if $(PYTHON),--python=$(PYTHON),)
+	$(UV) run -- nox -s test_custom_class $(if $(PYTHON),--python=$(PYTHON),)
+	$(UV) run -- nox -s test_openai $(if $(PYTHON),--python=$(PYTHON),)
 
 help:
 	@echo '===================='
