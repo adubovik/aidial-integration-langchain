@@ -23,20 +23,21 @@ def _get_pos_arg_count(func):
     )
 
 
-def _get_env_var_list(name: str) -> Optional[List[str]]:
+def _get_env_var_list(name: str, default: List[str] = []) -> List[str]:
     value = os.getenv(name)
-    return None if value is None else value.split(",")
+    return default if value is None else value.split(",")
 
 
 EXTRA_REQUEST_MESSAGE_FIELDS = _get_env_var_list(
-    "LC_EXTRA_REQUEST_MESSAGE_FIELDS"
-) or ["custom_content"]
+    "LC_EXTRA_REQUEST_MESSAGE_FIELDS", ["custom_content"]
+)
 EXTRA_RESPONSE_MESSAGE_FIELDS = _get_env_var_list(
-    "LC_EXTRA_RESPONSE_MESSAGE_FIELDS"
-) or ["custom_content"]
-EXTRA_RESPONSE_FIELDS = _get_env_var_list("LC_EXTRA_RESPONSE_FIELDS") or [
-    "statistics"
-]
+    "LC_EXTRA_RESPONSE_MESSAGE_FIELDS", ["custom_content"]
+)
+EXTRA_RESPONSE_FIELDS = _get_env_var_list(
+    "LC_EXTRA_RESPONSE_FIELDS", ["statistics"]
+)
+
 # NOTE: not really needed, since they are propagated automatically via extra_body
 # EXTRA_REQUEST_FIELDS = ["addons", "max_prompt_tokens", "custom_fields"]
 
