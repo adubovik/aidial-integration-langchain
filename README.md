@@ -33,14 +33,14 @@ This is achieved via monkey-patching certain private methods in `langchain_opena
 
 ### Usage
 
-Copy [the patch modules](./aidial_integration_langchain/patch/) to your project, then import before any Langchain module is imported.
+Copy [the patch modules](./src/aidial_integration_langchain/patch/) to your project, then import before any Langchain module is imported.
 
 ```sh
 > cd example
 > python -m venv .venv
 > source .venv/bin/activate
 > pip install -q -r requirements.txt
-> cp -r ../aidial_integration_langchain/patch .
+> cp -r ../src/aidial_integration_langchain/patch .
 > python -m app
 Received extra fields in:
 (1) ☑ Request - in the `messages` list
@@ -66,7 +66,7 @@ Note that `langchain_openai<=0.1.22` doesn't support response top-level extra fi
 
 The implementation of the `AzureChatOpenAI` class may be copied and modified as needed to take into account extra fields.
 
-Find the redefined classes at [aidial_integration_langchain.langchain_openai](./aidial_integration_langchain/langchain_openai/).
+Find the redefined classes at [aidial_integration_langchain.langchain_openai](./src/aidial_integration_langchain/langchain_openai/).
 
 ### Usage
 
