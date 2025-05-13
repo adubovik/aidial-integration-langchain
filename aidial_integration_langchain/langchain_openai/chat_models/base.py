@@ -286,7 +286,7 @@ def _convert_delta_to_message_chunk(
         return default_class(content=content, id=id_)  # type: ignore
 
 
-@patch_convert_chunk_to_generation_chunk
+@patch_convert_chunk_to_generation_chunk(with_self=False)
 def _convert_chunk_to_generation_chunk(
     chunk: dict, default_chunk_class: Type, base_generation_info: Optional[Dict]
 ) -> Optional[ChatGenerationChunk]:

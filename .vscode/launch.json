@@ -17,6 +17,17 @@
       "purpose": ["debug-test"],
       "console": "integratedTerminal",
       "justMyCode": false
+    },
+    {
+      "name": "make test",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "-k", "test_langchain_streaming[False]", "-vv", "--capture=no",
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false
     }
   ]
 }
