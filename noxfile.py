@@ -15,7 +15,7 @@ def format_with_args(session: nox.Session, *args):
 def lint(session: nox.Session):
     """Runs linters and fixers"""
     try:
-        session.run("poetry", "install", "--all-extras", external=True)
+        session.run("poetry", "install", "-q", "--all-extras", external=True)
         session.run("poetry", "check", "--lock", external=True)
         session.run("pyright", SRC)
         session.run("flake8", SRC)
@@ -29,7 +29,7 @@ def lint(session: nox.Session):
 @nox.session
 def format(session: nox.Session):
     """Runs linters and fixers"""
-    session.run("poetry", "install", external=True)
+    session.run("poetry", "install", "-q", external=True)
     format_with_args(session, SRC)
 
 
@@ -46,7 +46,7 @@ supported_lc_openai_versions = [
     # 0.1.4: module 'langchain_openai.chat_models.base' has no attribute 'BaseChatOpenAI'
     # 0.1.16: BaseChatOpenAI._create_chat_result() takes 2 positional arguments but 3
     # 0.1.22: `_convert_chunk_to_generation_chunk` from `langchain_openai.chat_models.base` doesn't exist
-    *[f"0.1.{i}" for i in range(1, 26)],
+    *[f"0.1.{i}" for i in range(1, 26) if i != 18],  # 0.1.18 doesn't exist
     *[f"0.2.{i}" for i in range(0, 15)],
     *[f"0.3.{i}" for i in range(0, 17)],
 ]
@@ -56,7 +56,7 @@ supported_lc_openai_versions = [
 @nox.parametrize("langchain_openai", supported_lc_openai_versions)
 def test_monkey_patch(session: nox.Session, langchain_openai: str) -> None:
     """Runs tests for the patch"""
-    session.run("poetry", "install", external=True)
+    session.run("poetry", "install", "-q", external=True)
     session.install(f"langchain_openai=={langchain_openai}")
     session.run(
         "pytest",
@@ -69,7 +69,7 @@ def test_monkey_patch(session: nox.Session, langchain_openai: str) -> None:
 @nox.parametrize("langchain_openai", ["0.2.0"])
 def test_custom_class(session: nox.Session, langchain_openai: str) -> None:
     """Runs tests for the patch"""
-    session.run("poetry", "install", external=True)
+    session.run("poetry", "install", "-q", external=True)
     session.install(f"langchain_openai=={langchain_openai}")
     session.run("pytest", "tests/test_langchain_custom_class.py")
 
@@ -78,6 +78,6 @@ def test_custom_class(session: nox.Session, langchain_openai: str) -> None:
 @nox.parametrize("openai", ["1.48.0", "1.58.1"])
 def test_openai(session: nox.Session, openai: str) -> None:
     """Runs tests for the patch"""
-    session.run("poetry", "install", external=True)
+    session.run("poetry", "install", "-q", external=True)
     session.install(f"openai=={openai}")
     session.run("pytest", "tests/test_openai.py")

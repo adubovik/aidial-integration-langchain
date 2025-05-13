@@ -44,30 +44,10 @@ The following `langchain_openai` versions have been tested for Python 3.9, 3.10,
 
 |Version|Request per-message|Response per-message|Response top-level|
 |---|---|---|---|
-|0.1.1|🟢|🟢|🔴|
-|0.1.2|🟢|🟢|🔴|
-|0.1.3|🟢|🟢|🔴|
-|0.1.4|🟢|🟢|🔴|
-|0.1.5|🟢|🟢|🔴|
-|0.1.6|🟢|🟢|🔴|
-|0.1.7|🟢|🟢|🔴|
-|0.1.8|🟢|🟢|🔴|
-|0.1.9|🟢|🟢|🔴|
-|0.1.10|🟢|🟢|🔴|
-|0.1.11|🟢|🟢|🔴|
-|0.1.12|🟢|🟢|🔴|
-|0.1.13|🟢|🟢|🔴|
-|0.1.14|🟢|🟢|🔴|
-|0.1.15|🟢|🟢|🔴|
-|0.1.16|🟢|🟢|🔴|
-|0.1.17|🟢|🟢|🔴|
-|0.1.19|🟢|🟢|🔴|
-|0.1.20|🟢|🟢|🔴|
-|0.1.22|🟢|🟢|🔴|
-|0.1.23|🟢|🟢|🟢|
-|0.1.24|🟢|🟢|🟢|
-|0.1.25|🟢|🟢|🟢|
-|0.2.0|🟢|🟢|🟢|
+|>=0.1.1,<=0.1.22|🟢|🟢|🔴|
+|>=0.1.23,<=0.1.25|🟢|🟢|🟢|
+|>=0.2.0,<=0.2.14|🟢|🟢|🟢|
+|>=0.3.0,<=0.3.16|🟢|🟢|🟢|
 
 Note that `langchain_openai<=0.1.22` doesn't support response top-level extra fields, since the structure of the code back then was not very amicable for monkey-patching in this particular respect.
 
