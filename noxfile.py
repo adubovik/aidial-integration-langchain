@@ -42,31 +42,13 @@ supported_python_versions = [
 ]
 
 supported_lc_openai_versions = [
-    # "0.0.2",  # AsyncCompletions.create() got an unexpected keyword argument 'http_async_client'
-    "0.1.1",
-    "0.1.2",
-    "0.1.3",
-    "0.1.4",  # module 'langchain_openai.chat_models.base' has no attribute 'BaseChatOpenAI'
-    "0.1.5",
-    "0.1.6",
-    "0.1.7",
-    "0.1.8",
-    "0.1.9",
-    "0.1.10",
-    "0.1.11",
-    "0.1.12",
-    "0.1.13",
-    "0.1.14",
-    "0.1.15",
-    "0.1.16",  # BaseChatOpenAI._create_chat_result() takes 2 positional arguments but 3
-    "0.1.17",
-    "0.1.19",
-    "0.1.20",
-    "0.1.22",  # '_convert_chunk_to_generation_chunk' from 'langchain_openai.chat_models.base' doesn't exist
-    "0.1.23",
-    "0.1.24",
-    "0.1.25",
-    "0.2.0",
+    # 0.0.2: NOT Supported: AsyncCompletions.create() got an unexpected keyword argument 'http_async_client'
+    # 0.1.4: module 'langchain_openai.chat_models.base' has no attribute 'BaseChatOpenAI'
+    # 0.1.16: BaseChatOpenAI._create_chat_result() takes 2 positional arguments but 3
+    # 0.1.22: `_convert_chunk_to_generation_chunk` from `langchain_openai.chat_models.base` doesn't exist
+    *[f"0.1.{i}" for i in range(1, 26)],
+    *[f"0.2.{i}" for i in range(0, 15)],
+    *[f"0.3.{i}" for i in range(0, 17)],
 ]
 
 
@@ -93,7 +75,7 @@ def test_custom_class(session: nox.Session, langchain_openai: str) -> None:
 
 
 @nox.session(python=supported_python_versions)
-@nox.parametrize("openai", ["1.48.0"])
+@nox.parametrize("openai", ["1.48.0", "1.58.1"])
 def test_openai(session: nox.Session, openai: str) -> None:
     """Runs tests for the patch"""
     session.run("poetry", "install", external=True)

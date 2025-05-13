@@ -99,17 +99,35 @@ def patch_create_chat_result(func):
     return _func
 
 
-def patch_convert_chunk_to_generation_chunk(func):
-    def _func(
-        chunk: dict,
-        default_chunk_class: Type,
-        base_generation_info: Optional[Dict],
-    ) -> Optional[ChatGenerationChunk]:
-        result = func(chunk, default_chunk_class, base_generation_info)
-        if result:
-            result.message.response_metadata.update(
-                _mask_by_keys(chunk, EXTRA_RESPONSE_FIELDS)
+def patch_convert_chunk_to_generation_chunk(*, with_self: bool):
+    def decorator(func):
+        def _self_func(
+            self,
+            chunk: dict,
+            default_chunk_class: Type,
+            base_generation_info: Optional[Dict],
+        ) -> Optional[ChatGenerationChunk]:
+            result = func(
+                self, chunk, default_chunk_class, base_generation_info
             )
-        return result
+            if result:
+                result.message.response_metadata.update(
+                    _mask_by_keys(chunk, EXTRA_RESPONSE_FIELDS)
+                )
+            return result
 
-    return _func
+        def _func(
+            chunk: dict,
+            default_chunk_class: Type,
+            base_generation_info: Optional[Dict],
+        ) -> Optional[ChatGenerationChunk]:
+            result = func(chunk, default_chunk_class, base_generation_info)
+            if result:
+                result.message.response_metadata.update(
+                    _mask_by_keys(chunk, EXTRA_RESPONSE_FIELDS)
+                )
+            return result
+
+        return _self_func if with_self else _func
+
+    return decorator
