@@ -1,6 +1,6 @@
 VENV_DIR ?= .venv
 POETRY ?= $(VENV_DIR)/bin/poetry
-POETRY_VERSION ?= 1.8.5
+POETRY_VERSION ?= 2.1.3
 
 all: build
 
