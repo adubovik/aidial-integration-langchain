@@ -6,5 +6,5 @@
 ignore = E501, W503, E203, E704
 exclude =
     .venv,
-    .nox,
+    .tox,
     __pycache__

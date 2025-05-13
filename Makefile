@@ -19,21 +19,21 @@ publish: build
 
 clean:
 	rm -rf $(VENV_DIR)
-	rm -rf .nox
+	rm -rf .tox
 	rm -rf .pytest_cache
 	rm -rf dist
 	find . -type d -name __pycache__ | xargs rm -r
 
 lint: install
-	$(UV) run -- nox -s lint
+	$(UV) run -- tox -e lint
 
 format: install
-	$(UV) run -- nox -s format
+	$(UV) run -- tox -e format
 
 test: install
-	$(UV) run -- nox -s test_monkey_patch $(if $(PYTHON),--python=$(PYTHON),)
-	$(UV) run -- nox -s test_custom_class $(if $(PYTHON),--python=$(PYTHON),)
-	$(UV) run -- nox -s test_openai $(if $(PYTHON),--python=$(PYTHON),)
+	$(UV) run -- tox -p auto -f test_monkey_patch
+	$(UV) run -- tox -p auto -f test_custom_class
+	$(UV) run -- tox -p auto -f test_openai
 
 help:
 	@echo '===================='
