@@ -9,7 +9,7 @@ init_env:
 	$(VENV_DIR)/bin/pip install poetry==$(POETRY_VERSION) --quiet
 
 install: init_env
-	$(POETRY) install --all-extras
+	$(POETRY) install -q --all-extras
 
 build: install
 	$(POETRY) build

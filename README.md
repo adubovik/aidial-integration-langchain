@@ -9,18 +9,21 @@ The repo provides ways to overcome this issue.
 Find the minimal example highlighting the issue with `langchain_openai` at the [example folder](./example/):
 
 ```sh
+> cd example
 > python -m venv .venv
-> source ./.venv/bin/activate
-> pip install -r requirements.txt
+> source .venv/bin/activate
+> pip install -q -r requirements.txt
 > python -m app
-(1) Missing per-message request extra
-(3) Missing per-message response extra
-(4) Missing top-level response extra
+Received extra fields in:
+(1) ☐ Request - in the `messages` list
+(2) ☑ Request - on the top-level
+(3) ☐ Response - in the `message` field
+(4) ☐ Response - on the top-level
 ```
 
 `langchain_openai` ignores certain extra fields, meaning that the upstream endpoint won't receive (1) and the client won't receive (3) and (4) if they were sent by the upstream.
 
-Note that **top-level request extra fields** do actually reach the endpoint.
+Note that **top-level request extra fields** do actually reach the upstream.
 
 ## Solution #1 *(monkey-patching the library)*
 
@@ -30,12 +33,20 @@ This is achieved via monkey-patching certain private methods in `langchain_opena
 
 ### Usage
 
-Copy [the patch modules](./aidial_integration_langchain/patch/) to your project, then import before any Langchain module is imported:
+Copy [the patch modules](./aidial_integration_langchain/patch/) to your project, then import before any Langchain module is imported.
 
-```python
-import patch # isort:skip  # noqa: F401
-
-# ./example/app.py code
+```sh
+> cd example
+> python -m venv .venv
+> source .venv/bin/activate
+> pip install -q -r requirements.txt
+> cp -r ../aidial_integration_langchain/patch .
+> python -m app
+Received extra fields in:
+(1) ☑ Request - in the `messages` list
+(2) ☑ Request - on the top-level
+(3) ☑ Response - in the `message` field
+(4) ☑ Response - on the top-level
 ```
 
 ### Supported versions
