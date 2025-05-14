@@ -31,9 +31,7 @@ format: install
 	$(UV) run -- tox -e format
 
 test: install
-	$(UV) run -- tox -p auto -f test_monkey_patch
-	$(UV) run -- tox -p auto -f test_custom_class
-	$(UV) run -- tox -p auto -f test_openai
+	UV=$(UV) PYTHON=$(PYTHON) ./scripts/test.sh $(UV)
 
 help:
 	@echo '===================='
