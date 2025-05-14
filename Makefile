@@ -31,7 +31,7 @@ format: install
 	$(UV) run -- tox -e format
 
 test: install
-	UV=$(UV) PYTHON=$(PYTHON) ./scripts/test.sh $(UV)
+	UV=$(UV) PYTHON=$(PYTHON) ./scripts/test.sh
 
 help:
 	@echo '===================='
