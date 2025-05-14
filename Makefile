@@ -7,6 +7,7 @@ all: install
 init_env:
 	python -m venv $(VENV_DIR)
 	$(VENV_DIR)/bin/pip install uv==$(UV_VERSION) --quiet
+	$(UV) tool install tox==4.15.1 --with tox-uv
 
 install: init_env
 	$(UV) sync --quiet --all-extras
@@ -19,21 +20,19 @@ publish: build
 
 clean:
 	rm -rf $(VENV_DIR)
-	rm -rf .nox
+	rm -rf .tox
 	rm -rf .pytest_cache
 	rm -rf dist
 	find . -type d -name __pycache__ | xargs rm -r
 
 lint: install
-	$(UV) run -- nox -s lint
+	$(UV) tool run tox -e lint
 
 format: install
-	$(UV) run -- nox -s format
+	$(UV) tool run tox -e format
 
 test: install
-	$(UV) run -- nox -s test_monkey_patch $(if $(PYTHON),--python=$(PYTHON),)
-	$(UV) run -- nox -s test_custom_class $(if $(PYTHON),--python=$(PYTHON),)
-	$(UV) run -- nox -s test_openai $(if $(PYTHON),--python=$(PYTHON),)
+	UV=$(UV) PYTHON=$(PYTHON) ./scripts/test.sh
 
 help:
 	@echo '===================='
