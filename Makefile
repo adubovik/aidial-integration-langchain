@@ -7,6 +7,7 @@ all: install
 init_env:
 	python -m venv $(VENV_DIR)
 	$(VENV_DIR)/bin/pip install uv==$(UV_VERSION) --quiet
+	$(UV) tool install tox==4.15.1 --with tox-uv
 
 install: init_env
 	$(UV) sync --quiet --all-extras
@@ -25,10 +26,10 @@ clean:
 	find . -type d -name __pycache__ | xargs rm -r
 
 lint: install
-	$(UV) run -- tox -e lint
+	$(UV) tool run tox -e lint
 
 format: install
-	$(UV) run -- tox -e format
+	$(UV) tool run tox -e format
 
 test: install
 	UV=$(UV) PYTHON=$(PYTHON) ./scripts/test.sh
