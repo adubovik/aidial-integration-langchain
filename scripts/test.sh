@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 PY_FACTOR=${PYTHON:+py${PYTHON//./}}
 echo "PYTHON=$PYTHON"
 echo "PY_FACTOR=$PY_FACTOR"
