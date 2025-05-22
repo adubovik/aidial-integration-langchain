@@ -3,7 +3,7 @@ name = "aidial-integration-langchain"
 version = "0.1.0"
 description = "Utilities for integration of AI DIAL API with Langchain library"
 authors = [
-    {name="DIAL", email="EPAM RAIL <SpecialEPM-DIALDevTeam@epam.com>"}
+    {name="EPAM RAIL", email="SpecialEPM-DIALDevTeam@epam.com"}
 ]
 license = "Apache-2.0"
 readme = "README.md"
